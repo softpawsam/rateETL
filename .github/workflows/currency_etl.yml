@@ -1,0 +1,58 @@
+name: Currency Data ETL Pipeline
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  
+  workflow_dispatch:
+  
+  push:
+    branches:
+      - main
+    paths:
+      - 'currency_etl.py'  
+
+jobs:
+  load-currency-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pandas sqlalchemy psycopg2-binary python-dotenv
+        # Or if you have requirements.txt:
+        # pip install -r requirements.txt
+    
+    - name: Run ETL script
+      env:
+        API_KEY: ${{ secrets.API_KEY }}
+        CDB_HOST: ${{ secrets.CDB_HOST }}
+        CDB_PORT: ${{ secrets.CDB_PORT }}
+        CDB_NAME: ${{ secrets.CDB_NAME }}
+        CDB_USER: ${{ secrets.CDB_USER }}
+        CDB_PASSWORD: ${{ secrets.CDB_PASSWORD }}
+      run: |
+        python currency_etl.py
+    
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "❌ ETL pipeline failed!"
+        # Add notification logic here (email, Slack, etc.)
