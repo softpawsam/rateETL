@@ -10,7 +10,7 @@ on:
     branches:
       - main
     paths:
-      - 'currency_etl.py'  
+      - 'ETL_Currency_Rate_Cloud.py'  
 
 jobs:
   load-currency-data:
