@@ -49,7 +49,7 @@ jobs:
         CDB_USER: ${{ secrets.CDB_USER }}
         CDB_PASSWORD: ${{ secrets.CDB_PASSWORD }}
       run: |
-        python currency_etl.py
+        python ETL_Currency_Rate_Cloud.py
     
     - name: Notify on failure
       if: failure()
